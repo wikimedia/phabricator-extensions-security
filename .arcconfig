@@ -1,5 +1,5 @@
 {
-  "project.name" : "phab-security",
+  "project.name" : "security",
   "phabricator.uri" : "https://phabricator.wikimedia.org/",
   "unit.engine" : "PhutilUnitTestEngine"
 }

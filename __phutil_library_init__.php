@@ -1,3 +1,3 @@
 <?php
 
-phutil_register_library('phab-security', __FILE__);
+phutil_register_library('security', __FILE__);

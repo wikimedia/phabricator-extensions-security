@@ -1,0 +1,6 @@
+{
+  "project.name" : "phab-security",
+  "phabricator.uri" : "https://phabricator.wikimedia.org/",
+  "unit.engine" : "PhutilUnitTestEngine"
+}
+

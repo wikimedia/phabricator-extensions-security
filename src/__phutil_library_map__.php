@@ -9,17 +9,15 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
-    'PhabricatorPolicyRuleTaskSubscribers' => 'src/PhabricatorPolicyRuleTaskSubscribers.php',
-    'SecurityPolicyEnforcerAction' => 'src/SecurityPolicyEnforcerAction.php',
-    'SecurityPolicyEnforcerTestCase' => 'src/__tests__/SecurityPolicyTestCase.php',
-    'SecurityPolicyEventListener' => 'src/SecurityPolicyListener.php',
-    'WMFSecurityPolicy' => 'src/WMFSecurityPolicy.php',
+    'PhabricatorPolicyRuleTaskSubscribers' => 'policy/PhabricatorPolicyRuleTaskSubscribers.php',
+    'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
+    'SecurityPolicyEventListener' => 'policy/SecurityPolicyListener.php',
+    'WMFSecurityPolicy' => 'policy/WMFSecurityPolicy.php',
   ),
   'function' => array(),
   'xmap' => array(
     'PhabricatorPolicyRuleTaskSubscribers' => 'PhabricatorPolicyRule',
     'SecurityPolicyEnforcerAction' => 'HeraldCustomAction',
-    'SecurityPolicyEnforcerTestCase' => 'PhabricatorTestCase',
     'SecurityPolicyEventListener' => 'PhutilEventListener',
   ),
 ));

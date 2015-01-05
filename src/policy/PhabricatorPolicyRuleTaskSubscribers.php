@@ -11,7 +11,9 @@ final class PhabricatorPolicyRuleTaskSubscribers
 
   public function willApplyRules(PhabricatorUser $viewer, array $values) {
     $values = array_unique(array_filter(array_mergev($values)));
-
+    if (empty($values)){
+      return;
+    }
     $this->subscribed_to = array();
     $viewer_phid = $viewer->getPHID();
     $tasks = id(new ManiphestTaskQuery())

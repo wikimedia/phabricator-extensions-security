@@ -51,6 +51,10 @@ class SecurityPolicyEventListener
         if ($t->getNewValue() == 'security-bug'
           && $t->getOldValue() != 'security-bug') {
           $switchToSecurity = true;
+          $security_setting = 'security_bug';
+          $project = WMFSecurityPolicy::getProjectByName('security');
+          $project_phids = array($project->getPHID() => $project->getPHID());
+          break;
         }
       }
       if (!$switchToSecurity) {

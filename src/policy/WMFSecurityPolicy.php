@@ -78,7 +78,7 @@ final class WMFSecurityPolicy
           break;
       }
     }
-    return $transactions;
+    return array_values($transactions);
   }
 
   /**

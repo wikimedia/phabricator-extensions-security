@@ -27,7 +27,7 @@ class SecurityPolicyEventListener
     $type_hasproj = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $security_setting = WMFSecurityPolicy::getSecurityFieldValue($task);
 
-    if ($security_setting == 'none' || $security_setting == 'default') {
+    if ($is_new && $security_setting == 'default') {
       return;
     }
 

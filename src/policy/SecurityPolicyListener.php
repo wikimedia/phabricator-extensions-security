@@ -41,9 +41,21 @@ class SecurityPolicyEventListener
     if (!$is_new) {
       // on pre-existing tasks we simply
       // filter out any transactions that would make the task public
-      $event->setValue('transactions',
-        WMFSecurityPolicy::filter_policy_transactions($transactions));
-      return;
+      $transactions =
+        WMFSecurityPolicy::filter_policy_transactions($transactions);
+      $event->setValue('transactions', $transactions);
+
+      $switchToSecurity = false;
+
+      foreach ($transactions as $t) {
+        if ($t->getNewValue() == 'security-bug'
+          && $t->getOldValue() != 'security-bug') {
+          $switchToSecurity = true;
+        }
+      }
+      if (!$switchToSecurity) {
+        return;
+      }
     }
 
     if ($security_setting == 'ops-access-request') {

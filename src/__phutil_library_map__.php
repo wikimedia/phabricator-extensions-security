@@ -9,15 +9,15 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
-    'PhabricatorPolicyRuleTaskSubscribers' => 'policy/PhabricatorPolicyRuleTaskSubscribers.php',
     'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
     'SecurityPolicyEventListener' => 'policy/SecurityPolicyListener.php',
     'WMFSecurityPolicy' => 'policy/WMFSecurityPolicy.php',
+    'WMFSubscribersPolicyRule' => 'policy/WMFSubscribersPolicyRule.php',
   ),
   'function' => array(),
   'xmap' => array(
-    'PhabricatorPolicyRuleTaskSubscribers' => 'PhabricatorPolicyRule',
     'SecurityPolicyEnforcerAction' => 'HeraldCustomAction',
     'SecurityPolicyEventListener' => 'PhutilEventListener',
+    'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
   ),
 ));

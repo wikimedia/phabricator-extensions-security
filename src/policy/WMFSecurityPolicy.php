@@ -115,21 +115,21 @@ final class WMFSecurityPolicy
     if (!empty($user_phids)){
       $rules[] = array(
         'action' => PhabricatorPolicy::ACTION_ALLOW,
-        'rule'   => 'PhabricatorPolicyRuleUsers',
+        'rule'   => 'PhabricatorUsersPolicyRule',
         'value'  => $user_phids,
       );
     }
     if (!empty($project_phids)) {
       $rules[] = array(
         'action' => PhabricatorPolicy::ACTION_ALLOW,
-        'rule'   => 'PhabricatorPolicyRuleProjects',
+        'rule'   => 'PhabricatorProjectsPolicyRule',
         'value'  => $project_phids,
       );
     }
     if ($include_subscribers) {
       $rules[] = array(
         'action' => PhabricatorPolicy::ACTION_ALLOW,
-        'rule'   => 'PhabricatorPolicyRuleTaskSubscribers',
+        'rule'   => 'WMFSubscribersPolicyRule',
         'value'  => array($task->getPHID()),
       );
     }

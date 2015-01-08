@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorPolicyRuleTaskSubscribers
+final class WMFSubscribersPolicyRule
   extends PhabricatorPolicyRule {
 
-  private $subscribed_to = array();
+  private static $subscribers_by_object = array();
 
   public function getRuleDescription() {
-    return pht('subscribers of maniphest task');
+    return pht('users subscribed to');
   }
 
   public function willApplyRules(PhabricatorUser $viewer, array $values) {
@@ -14,30 +14,54 @@ final class PhabricatorPolicyRuleTaskSubscribers
     if (empty($values)){
       return;
     }
-    $this->subscribed_to = array();
-    $viewer_phid = $viewer->getPHID();
-    $tasks = id(new ManiphestTaskQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($values)
+
+    //see which objects need lookup (not already cached)
+    $lookup_phids = array();
+    foreach($values as $object_phid) {
+      if (empty(self::$subscribers_by_object[$object_phid])){
+        //save phids of tasks which need subscribers lookup
+        $lookup_phids[]=$object_phid;
+      }
+    }
+    if (empty($lookup_phids)){
+      //everything already cached
+      return;
+    }
+
+    //preload the subscribers for the objects in question
+    $result = id(new PhabricatorSubscribersQuery())
+      ->withObjectPHIDs($lookup_phids)
       ->execute();
 
-    foreach($tasks as $task){
-      $ccs = $task->getCCPHIDs();
-      $this->subscribed_to[$task->getPHID()] = in_array($viewer_phid, $ccs);
+    foreach ($result as $object_phid => $subscribers) {
+      self::$subscribers_by_object[$object_phid] = $subscribers;
     }
   }
 
   public function applyRule(PhabricatorUser $viewer, $value) {
-    if (!is_array($value)){
+    $viewer_phid = $viewer->getPHID();
+
+    if (!is_array($value)) {
       $value = array($value);
     }
-    foreach($value as $v) {
-      if (isset($this->subscribed_to[$v])) {
-        return $this->subscribed_to[$v];
+    foreach($value as $object_phid) {
+      if (!isset(self::$subscribers_by_object[$object_phid]))
+      {
+        // not found, continue checking remaining objects (if any)
+        continue;
+      }
+      if (in_array($viewer_phid, self::$subscribers_by_object[$object_phid])) {
+        // found the viewer in a configured object's subscriber list
+        // rule succeeds:
+        return true;
       }
     }
+    // viewer was not found in any object's subscriber list, rule fails:
     return false;
   }
+
+
+  // remaining methods are needed to support the rule editor typeahead UI:
 
   public function getValueControlType() {
     return self::CONTROL_TYPE_TOKENIZER;

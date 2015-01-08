@@ -41,11 +41,6 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
     // we set to true if/when we apply any effect
     $applied = false;
 
-    // This custom action is now a NOOP as the functionality has moved to
-    // SecurityPolicyListener.php
-    return new HeraldApplyTranscript($effect,$applied);
-
-
     if ($is_new) {
       // SecurityPolicyEventListener will take care of
       // setting the policy for newly created tasks so
@@ -88,13 +83,21 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
           ->setNewValue($edit_policy->getPHID()));
         $applied = true;
       }
-
+      if (!empty($project_phids)) {
+        $adapter->queueTransaction(id(new ManiphestTransaction())
+                ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+                ->setMetadataValue(
+                    'edge:type',
+                    PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+                ->setNewValue(array('+' => array_fuse($project_phids))));
+        $applied = true;
+      }
     }
 
     return new HeraldApplyTranscript(
       $effect,
       $applied,
-      pht('Reset security policy'));
+      pht('Reset security settings'));
   }
 
 

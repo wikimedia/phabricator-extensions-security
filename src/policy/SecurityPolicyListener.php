@@ -39,11 +39,11 @@ class SecurityPolicyEventListener
 
     // validate the policy changes on edits to pre-existing tasks:
     if (!$is_new) {
+
+      return;
       // on pre-existing tasks we simply
       // filter out any transactions that would make the task public
-      $transactions =
-        WMFSecurityPolicy::filter_policy_transactions($transactions);
-      $event->setValue('transactions', $transactions);
+
 
       $switchToSecurity = false;
 
@@ -51,13 +51,18 @@ class SecurityPolicyEventListener
         if ($t->getNewValue() == 'security-bug'
           && $t->getOldValue() != 'security-bug') {
           $switchToSecurity = true;
-          $security_setting = 'security_bug';
+          $security_setting = 'security-bug';
           $project = WMFSecurityPolicy::getProjectByName('security');
           $project_phids = array($project->getPHID() => $project->getPHID());
           break;
         }
       }
       if (!$switchToSecurity) {
+        if ($security_setting == 'security-bug') {
+          $transactions =
+          WMFSecurityPolicy::filter_policy_transactions($transactions);
+          $event->setValue('transactions', $transactions);
+        }
         return;
       }
     }
@@ -129,6 +134,8 @@ class SecurityPolicyEventListener
         }
       }
 
+      //phlog($view_policy);
+      //phlog($transactions);
       $event->setValue('transactions', $transactions);
 
     }
@@ -161,7 +168,7 @@ class SecurityPolicyEventListener
     $this->setTaskId($task, $policies['edit']);
   }
 
-  // fix the task id on PhabricatorPolicyRuleTaskSubscribers rules which get a
+  // fix the task id on WMFSubscribersPolicyRule rules which get a
   // null value due to a race between task creation and policy creation.
   // the task id doesn't exist until after policy object is created but
   // policy needs the task id, so we fix the null value here, after task creation:
@@ -170,7 +177,7 @@ class SecurityPolicyEventListener
     $save         = false;
 
     foreach($rules as $key=>$rule) {
-      if ($rule['rule'] == 'PhabricatorPolicyRuleTaskSubscribers') {
+      if ($rule['rule'] == 'WMFSubscribersPolicyRule') {
         if ($rule['value'][0]==null) {
           $rule['value'] = array($task->getPHID());
           $rules[$key] = $rule;

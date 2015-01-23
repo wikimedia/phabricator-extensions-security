@@ -180,13 +180,14 @@ final class WMFSecurityPolicy
       $project->getPHID(),$ops->getPHID()
     );
 
+    $task->save();
 
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $transactions = array();
 
     // Make this public task depend on a corresponding 'private task'
-    $edge_type = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
+    $edge_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
 
     // First check for a pre-existant 'private task':
     $preexisting_tasks = PhabricatorEdgeQuery::loadDestinationPHIDs(
@@ -197,10 +198,10 @@ final class WMFSecurityPolicy
     if (!count($preexisting_tasks)) {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
-        ->withUsernames(array('admin'))
+        ->withUsernames(array('phab'))
         ->executeOne();
 
-      $policy = createCustomPolicy($task, array(), $ops_phids, true);
+      $policy = self::createCustomPolicy($task, array(), $ops_phids, true);
 
       $oid = $task->getID();
 

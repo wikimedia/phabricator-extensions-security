@@ -25,3 +25,7 @@ custom field on each task)
     and it will now function as a no-op. The related herald rule should be removed from
     phabricator.
 
+
+
+TODO: User and project names should be configurable
+

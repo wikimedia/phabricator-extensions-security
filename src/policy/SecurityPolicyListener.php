@@ -72,11 +72,13 @@ class SecurityPolicyEventListener
       // we create a subtask which gets custom policy settings applied.
       // any returned transactions get applied to the parent task to record
       // the association with the subtask.
-      $trans = WMFSecurityPolicy::createPrivateSubtask($task);
-      $trans[$type_edge] = id(new ManiphestTransaction())
-          ->setTransactionType($type_edge)
-          ->setMetadataValue('edge:type',$type_hasproj)
-          ->setNewValue(array('+' => $project_phids));
+      $subtask_trns = WMFSecurityPolicy::createPrivateSubtask($task);
+      if (!empty($subtask_trns)) {
+        $trans[$type_edge] = id(new ManiphestTransaction())
+            ->setTransactionType($type_edge)
+            ->setMetadataValue('edge:type',$type_hasproj)
+            ->setNewValue(array('+' => $project_phids));
+      }
     } else {
       // other secure tasks get standard policies applied
 

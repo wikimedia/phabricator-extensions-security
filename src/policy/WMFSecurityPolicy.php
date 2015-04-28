@@ -175,7 +175,7 @@ final class WMFSecurityPolicy
   public static function createPrivateSubtask($task) {
     $ops = self::getProjectByName('operations');
     $ops_phids = array($ops->getPHID() => $ops->getPHID());
-    $project = self::getProjectByName('Ops-Access-Requests');
+    $project = self::getProjectByName('Ops-Access-Reviews');
     $project_phids = array(
       $project->getPHID(),$ops->getPHID()
     );
@@ -198,10 +198,10 @@ final class WMFSecurityPolicy
     if (!count($preexisting_tasks)) {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
-        ->withUsernames(array('phab'))
+        ->withUsernames(array('admin'))
         ->executeOne();
 
-      $policy = self::createCustomPolicy($task, array(), $ops_phids, true);
+      $policy = self::createCustomPolicy($task, array(), $ops_phids, false);
 
       $oid = $task->getID();
 

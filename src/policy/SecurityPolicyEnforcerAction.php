@@ -49,10 +49,13 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
       return new HeraldApplyTranscript($effect,$applied);
     }
     $security_setting = WMFSecurityPolicy::getSecurityFieldValue($task);
-    $project = WMFSecurityPolicy::getSecurityProjectForTask($task);
-    // we only do something if this is a secure task
-    // if it's not a secure task then $project will be null
-    if ($project) {
+
+    //if it's not a security bug, do nothing...
+    if ($security_setting != 'security-bug') {
+      return new HeraldApplyTranscript($effect,$applied);
+    }
+
+    if ($project = WMFSecurityPolicy::getSecurityProjectForTask($task)) {
       $project_phids = array($project->getPHID());
 
       // These policies are too-open and would allow anyone to view

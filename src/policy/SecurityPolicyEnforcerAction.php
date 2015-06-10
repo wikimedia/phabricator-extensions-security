@@ -50,51 +50,67 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
     }
     $security_setting = WMFSecurityPolicy::getSecurityFieldValue($task);
 
-    //if it's not a security bug, do nothing...
-    if ($security_setting != 'security-bug') {
+    // only enforce security for the above-listed values of security_setting
+    if ($security_setting=='security-bug' ||
+        $security_setting=='sensitive') {
+          // These policies are too-open and would allow anyone to view
+          // the protected task. We override these if someone tries to
+          // set them on a 'secure task'
+          $rejected_policies = array(
+            PhabricatorPolicies::POLICY_PUBLIC,
+            PhabricatorPolicies::POLICY_USER,
+          );
+      $forced_policies = array();
+    } else {
+      //do nothing
       return new HeraldApplyTranscript($effect,$applied);
     }
 
     if ($project = WMFSecurityPolicy::getSecurityProjectForTask($task)) {
       $project_phids = array($project->getPHID());
+    } else {
+      $project_phids = array();
+    }
 
-      // These policies are too-open and would allow anyone to view
-      // the protected task. We override these if someone tries to
-      // set them on a 'secure task'
-      $rejected_policies = array(
-        PhabricatorPolicies::POLICY_PUBLIC,
-        PhabricatorPolicies::POLICY_USER,
-      );
-      if (in_array($task->getViewPolicy(), $rejected_policies)
-        ||in_array($task->getEditPolicy(), $rejected_policies)) {
+    // check rejected policies first
+    if (in_array($task->getViewPolicy(), $rejected_policies)
+      ||in_array($task->getEditPolicy(), $rejected_policies)) {
 
-        $include_subscribers = ($security_setting == 'security-bug');
+      // only add the 'subscribers' policy rule to security bugs:
+      $include_subscribers = ($security_setting == 'security-bug');
 
-        $view_policy = WMFSecurityPolicy::createCustomPolicy(
-          $task,
-          $task->getAuthorPHID(),
-          $project_phids,
-          $include_subscribers);
+      $view_policy = WMFSecurityPolicy::createCustomPolicy(
+        $task,
+        $task->getAuthorPHID(),
+        $project_phids,
+        $include_subscribers);
 
-        $edit_policy = $view_policy;
+      $edit_policy = $view_policy;
 
+      $adapter->queueTransaction(id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($view_policy->getPHID()));
+      $adapter->queueTransaction(id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($edit_policy->getPHID()));
+      $applied = true;
+    } else if (!empty($forced_policies)) {
+      foreach ($forced_policies as $type=>$policy) {
         $adapter->queueTransaction(id(new ManiphestTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-          ->setNewValue($view_policy->getPHID()));
-        $adapter->queueTransaction(id(new ManiphestTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-          ->setNewValue($edit_policy->getPHID()));
-        $applied = true;
+          ->setTransactionType($type)
+          ->setNewValue($policy));
       }
-      if (!empty($project_phids)) {
-        $adapter->queueTransaction(id(new ManiphestTransaction())
-                ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-                ->setMetadataValue(
-                    'edge:type',
-                    PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
-                ->setNewValue(array('+' => array_fuse($project_phids))));
-        $applied = true;
-      }
+      $applied = true;
+    }
+
+    if (!empty($project_phids)) {
+      $adapter->queueTransaction(id(new ManiphestTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+              ->setMetadataValue(
+                  'edge:type',
+                  PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+              ->setNewValue(array('+' => array_fuse($project_phids))));
+      $applied = true;
     }
 
     return new HeraldApplyTranscript(

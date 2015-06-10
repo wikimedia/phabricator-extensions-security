@@ -27,6 +27,12 @@ class SecurityPolicyEventListener
     $type_hasproj = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $security_setting = WMFSecurityPolicy::getSecurityFieldValue($task);
 
+    if (!$is_new) {
+      // for pre-existing tasks, do nothing here, the custom herald action will
+      // enforce the policy (see SecurityPolicyEnforcerAction.php)
+      return;
+    }
+
     if ($is_new && $security_setting == 'default') {
       return;
     }
@@ -37,43 +43,13 @@ class SecurityPolicyEventListener
       $project_phids = array();
     }
 
-    // validate the policy changes on edits to pre-existing tasks:
-    if (!$is_new) {
-
-      return;
-      // on pre-existing tasks we simply
-      // filter out any transactions that would make the task public
-
-
-      $switchToSecurity = false;
-
-      foreach ($transactions as $t) {
-        if ($t->getNewValue() == 'security-bug'
-          && $t->getOldValue() != 'security-bug') {
-          $switchToSecurity = true;
-          $security_setting = 'security-bug';
-          $project = WMFSecurityPolicy::getProjectByName('security');
-          $project_phids = array($project->getPHID() => $project->getPHID());
-          break;
-        }
-      }
-      if (!$switchToSecurity) {
-        if ($security_setting == 'security-bug') {
-          $transactions =
-          WMFSecurityPolicy::filter_policy_transactions($transactions);
-          $event->setValue('transactions', $transactions);
-        }
-        return;
-      }
-    }
-
-    if ($security_setting == 'ops-access-request') {
+    if ($is_new && $security_setting == 'ops-access-request') {
       // ops access requests don't modify the request task, instead
       // we create a subtask which gets custom policy settings applied.
       // any returned transactions get applied to the parent task to record
       // the association with the subtask.
       $subtask_trns = WMFSecurityPolicy::createPrivateSubtask($task);
-      if (!empty($subtask_trns)) {
+      if (!empty($subtask_trns) && !empty($project_phids)) {
         $trans[$type_edge] = id(new ManiphestTransaction())
             ->setTransactionType($type_edge)
             ->setMetadataValue('edge:type',$type_hasproj)
@@ -81,9 +57,7 @@ class SecurityPolicyEventListener
       }
     } else {
       // other secure tasks get standard policies applied
-
-      // if it's a security-bug then we include subscribers (CCs) in the
-      // people who can view and edit
+      // if it's a security-bug then we include subscribers (CCs)
       $include_subscribers = ($security_setting == 'security-bug');
 
       $edit_policy = WMFSecurityPolicy::createCustomPolicy(
@@ -92,8 +66,9 @@ class SecurityPolicyEventListener
         $project_phids,
         $include_subscribers
       );
+
       // view policy and edit policy will be identical:
-      $view_policy = $edit_policy;
+      $policy_phid = $edit_policy->getPHID();
 
       $trans = array();
 
@@ -106,10 +81,11 @@ class SecurityPolicyEventListener
 
       $trans[$type_viewpol] = id(new ManiphestTransaction())
           ->setTransactionType($type_viewpol)
-          ->setNewValue($view_policy->getPHID());
+          ->setNewValue($policy_phid);
+
       $trans[$type_editpol] = id(new ManiphestTransaction())
           ->setTransactionType($type_editpol)
-          ->setNewValue($edit_policy->getPHID());
+          ->setNewValue($policy_phid);
 
       // These transactions replace any user-generated transactions of
       // the same type, e.g. user-supplied policy gets overwritten
@@ -119,7 +95,7 @@ class SecurityPolicyEventListener
         if ($type == $type_edge) {
           if ($t->getMetadataValue('edge:type') == $type_hasproj) {
             $val = $t->getNewValue();
-            if (isset($val['=']) && is_array($val['='])){
+            if (isset($val['=']) && is_array($val['='])) {
               $val['='] = array_unique(
                             array_merge(
                               $val['='], $project_phids));
@@ -130,16 +106,13 @@ class SecurityPolicyEventListener
             unset($trans[$type_edge]);
           }
         }
-        else if (isset($trans[$type])){
+        else if (isset($trans[$type])) {
           $transactions[$n] = $trans[$type];
           unset($trans[$type]);
         }
       }
 
-      //phlog($view_policy);
-      //phlog($transactions);
       $event->setValue('transactions', $transactions);
-
     }
 
     if (!empty($trans)) {
@@ -157,7 +130,6 @@ class SecurityPolicyEventListener
         ->setContentSource($content_source)
         ->applyTransactions($task, $trans);
     }
-
   }
 
   private function didEditTask($event) {

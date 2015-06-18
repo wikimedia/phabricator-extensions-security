@@ -9,7 +9,11 @@ final class WMFSubscribersPolicyRule
     return pht('users subscribed to');
   }
 
-  public function willApplyRules(PhabricatorUser $viewer, array $values) {
+  public function willApplyRules(
+    PhabricatorUser $viewer,
+    array $values,
+    array $objects) {
+
     $values = array_unique(array_filter(array_mergev($values)));
     if (empty($values)){
       return;
@@ -38,7 +42,11 @@ final class WMFSubscribersPolicyRule
     }
   }
 
-  public function applyRule(PhabricatorUser $viewer, $value) {
+  public function applyRule(
+    PhabricatorUser $viewer,
+    $value,
+    PhabricatorPolicyInterface $object) {
+
     $viewer_phid = $viewer->getPHID();
 
     if (!is_array($value)) {

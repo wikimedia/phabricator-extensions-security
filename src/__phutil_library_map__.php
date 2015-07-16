@@ -12,12 +12,10 @@ phutil_register_library_map(array(
     'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
     'SecurityPolicyEventListener' => 'policy/SecurityPolicyListener.php',
     'WMFSecurityPolicy' => 'policy/WMFSecurityPolicy.php',
-    'WMFSubscribersPolicyRule' => 'policy/WMFSubscribersPolicyRule.php',
   ),
   'function' => array(),
   'xmap' => array(
     'SecurityPolicyEnforcerAction' => 'HeraldCustomAction',
     'SecurityPolicyEventListener' => 'PhutilEventListener',
-    'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
   ),
 ));

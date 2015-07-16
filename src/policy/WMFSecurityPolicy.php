@@ -12,23 +12,17 @@ final class WMFSecurityPolicy
    * @param string $projectName
    * @return PhabricatorProject|null
    */
-  public static function getProjectByName($projectName) {
-    static $projects = array();
-    if (isset($projects[$projectName])){
-      return $projects[$projectName];
+  public static function getProjectByName($projectName, $viewer=null) {
+    if ($viewer === null) {
+      $viewer = PhabricatorUser::getOmnipotentUser();
     }
 
     $query = new PhabricatorProjectQuery();
-    $project = $query->setViewer(PhabricatorUser::getOmnipotentUser())
+    $project = $query->setViewer($viewer)
                      ->withNames(array($projectName))
-                     ->needMembers(true)
+                     ->needMembers(false)
                      ->executeOne();
-
-    if (!$project) {
-      return null;
-    }
-
-    return $projects[$projectName] = $project;
+    return $project;
   }
 
   /**
@@ -129,7 +123,7 @@ final class WMFSecurityPolicy
     if ($include_subscribers) {
       $rules[] = array(
         'action' => PhabricatorPolicy::ACTION_ALLOW,
-        'rule'   => 'WMFSubscribersPolicyRule',
+        'rule'   => 'PhabricatorSubscriptionsSubscribersPolicyRule',
         'value'  => array($task->getPHID()),
       );
     }

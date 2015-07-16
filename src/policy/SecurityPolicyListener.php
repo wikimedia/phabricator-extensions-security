@@ -5,15 +5,15 @@ class SecurityPolicyEventListener
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK);
-    $this->listen(PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK);
+    //$this->listen(PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
       case PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK:
         return $this->willEditTask($event);
-      case PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK:
-        return $this->didEditTask($event);
+      //case PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK:
+      //  return $this->didEditTask($event);
     }
   }
 
@@ -129,39 +129,6 @@ class SecurityPolicyEventListener
         ->setActingAsPHID($acting_as)
         ->setContentSource($content_source)
         ->applyTransactions($task, $trans);
-    }
-  }
-
-  private function didEditTask($event) {
-    $task         = $event->getValue('task');
-    $transactions = $event->getValue('transactions');
-    $is_new       = $event->getValue('new');
-    $viewer       = PhabricatorUser::getOmnipotentUser();
-    $policies     = PhabricatorPolicyQuery::loadPolicies($viewer, $task);
-    $this->setTaskId($task, $policies['view']);
-    $this->setTaskId($task, $policies['edit']);
-  }
-
-  // fix the task id on WMFSubscribersPolicyRule rules which get a
-  // null value due to a race between task creation and policy creation.
-  // the task id doesn't exist until after policy object is created but
-  // policy needs the task id, so we fix the null value here, after task creation:
-  private function setTaskId($task, $policy) {
-    $rules        = $policy->getRules();
-    $save         = false;
-
-    foreach($rules as $key=>$rule) {
-      if ($rule['rule'] == 'WMFSubscribersPolicyRule') {
-        if ($rule['value'][0]==null) {
-          $rule['value'] = array($task->getPHID());
-          $rules[$key] = $rule;
-          $save = true;
-        }
-      }
-    }
-    if ($save) {
-      $policy->setRules($rules);
-      $policy->save();
     }
   }
 }

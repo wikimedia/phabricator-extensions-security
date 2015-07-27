@@ -25,7 +25,7 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
   }
 
   public function getActionType() {
-    return HeraldAdapter::VALUE_NONE;
+    return new HeraldEmptyFieldValue();
   }
 
   public function applyEffect(

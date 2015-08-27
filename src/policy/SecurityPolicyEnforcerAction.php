@@ -2,13 +2,19 @@
 // @TODO: remove this file once the herald rule that uses it is removed
 // from production.
 
-class SecurityPolicyEnforcerAction extends HeraldCustomAction {
+class SecurityPolicyEnforcerAction extends HeraldAction {
+  const TYPECONST = 'SecurityPolicy';
+  const ACTIONCONST = 'SecurityPolicy';
 
-  public function appliesToAdapter(HeraldAdapter $adapter) {
-    return $adapter instanceof HeraldManiphestTaskAdapter;
+  public function getActionGroupKey() {
+    return HeraldApplicationActionGroup::ACTIONGROUPKEY;
   }
 
-  public function appliesToRuleType($rule_type) {
+  public function supportsObject($object) {
+    return $object instanceof ManiphestTask;
+  }
+
+  public function supportsRuleType($rule_type) {
     if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
       return true;
     } else {
@@ -20,19 +26,25 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
     return "SecurityPolicy";
   }
 
-  public function getActionName() {
-    return "Ensure Security Task Policies are Enforced";
+  public function getHeraldActionName() {
+    return pht('Enforce Task Security Policy');
+  }
+
+  public function renderActionDescription($value) {
+    return pht("Ensure Security Task Policies are Enforced");
+  }
+
+  public function getHeraldActionStandardType() {
+    return self::STANDARD_NONE;
   }
 
   public function getActionType() {
     return new HeraldEmptyFieldValue();
   }
 
-  public function applyEffect(
-    HeraldAdapter $adapter,
-    $object,
-    HeraldEffect $effect) {
-
+  public function applyEffect($object,  HeraldEffect $effect) {
+    $adapter = $this->getAdapter();
+    $object = $adapter->getObject();
     /** @var ManiphestTask */
     $task = $object;
 
@@ -53,14 +65,15 @@ class SecurityPolicyEnforcerAction extends HeraldCustomAction {
     // only enforce security for the above-listed values of security_setting
     if ($security_setting=='security-bug' ||
         $security_setting=='sensitive') {
-          // These policies are too-open and would allow anyone to view
-          // the protected task. We override these if someone tries to
-          // set them on a 'secure task'
-          $rejected_policies = array(
-            PhabricatorPolicies::POLICY_PUBLIC,
-            PhabricatorPolicies::POLICY_USER,
-          );
-      $forced_policies = array();
+
+        // These policies are too-open and would allow anyone to view
+        // the protected task. We override these if someone tries to
+        // set them on a 'secure task'
+        $rejected_policies = array(
+          PhabricatorPolicies::POLICY_PUBLIC,
+          PhabricatorPolicies::POLICY_USER,
+        );
+        $forced_policies = array();
     } else {
       //do nothing
       return new HeraldApplyTranscript($effect,$applied);

@@ -16,7 +16,7 @@ phutil_register_library_map(array(
   ),
   'function' => array(),
   'xmap' => array(
-    'SecurityPolicyEnforcerAction' => 'HeraldCustomAction',
+    'SecurityPolicyEnforcerAction' => 'HeraldAction',
     'SecurityPolicyEventListener' => 'PhutilEventListener',
     'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
   ),

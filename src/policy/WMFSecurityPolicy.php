@@ -167,7 +167,7 @@ final class WMFSecurityPolicy
 
 
   public static function createPrivateSubtask($task) {
-    $ops = self::getProjectByName('operations');
+    $ops = self::getProjectByName('acl*operations-team');
     $ops_phids = array($ops->getPHID() => $ops->getPHID());
     $project = self::getProjectByName('Ops-Access-Reviews');
     $project_phids = array(

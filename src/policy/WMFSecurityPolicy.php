@@ -165,6 +165,16 @@ final class WMFSecurityPolicy
     return $field_value;
   }
 
+  public static function isTaskPublic($task) {
+    $policy = $task->getViewPolicy();
+
+    $public_policies = array(
+       PhabricatorPolicies::POLICY_PUBLIC,
+       PhabricatorPolicies::POLICY_USER);
+
+    return in_array($policy, $public_policies);
+  }
+
 
   public static function createPrivateSubtask($task) {
     $ops = self::getProjectByName('acl*operations-team');

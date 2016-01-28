@@ -11,6 +11,9 @@ phutil_register_library_map(array(
   'class' => array(
     'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
     'SecurityPolicyEventListener' => 'policy/SecurityPolicyListener.php',
+    'WMFEscalateTaskController' => 'policy/WMFLockTaskController.php',
+    'WMFEscalateTaskEventListener' => 'policy/WMFLockTaskEventListener.php',
+    'WMFExtensionsApplication' => 'policy/WMFExtensionsApplication.php',
     'WMFSecurityPolicy' => 'policy/WMFSecurityPolicy.php',
     'WMFSubscribersPolicyRule' => 'policy/WMFSubscribersPolicyRule.php',
   ),
@@ -18,6 +21,9 @@ phutil_register_library_map(array(
   'xmap' => array(
     'SecurityPolicyEnforcerAction' => 'HeraldAction',
     'SecurityPolicyEventListener' => 'PhutilEventListener',
+    'WMFEscalateTaskController' => 'PhabricatorController',
+    'WMFEscalateTaskEventListener' => 'PhabricatorEventListener',
+    'WMFExtensionsApplication' => 'PhabricatorApplication',
     'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
   ),
 ));

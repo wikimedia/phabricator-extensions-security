@@ -10,7 +10,6 @@ phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
     'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
-    'SecurityPolicyEventListener' => 'policy/SecurityPolicyListener.php',
     'WMFEscalateTaskController' => 'policy/WMFLockTaskController.php',
     'WMFEscalateTaskEventListener' => 'policy/WMFLockTaskEventListener.php',
     'WMFExtensionsApplication' => 'policy/WMFExtensionsApplication.php',
@@ -20,7 +19,6 @@ phutil_register_library_map(array(
   'function' => array(),
   'xmap' => array(
     'SecurityPolicyEnforcerAction' => 'HeraldAction',
-    'SecurityPolicyEventListener' => 'PhutilEventListener',
     'WMFEscalateTaskController' => 'PhabricatorController',
     'WMFEscalateTaskEventListener' => 'PhabricatorEventListener',
     'WMFExtensionsApplication' => 'PhabricatorApplication',

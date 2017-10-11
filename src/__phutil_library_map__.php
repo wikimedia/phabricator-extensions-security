@@ -8,20 +8,7 @@
  */
 phutil_register_library_map(array(
   '__library_version__' => 2,
-  'class' => array(
-    'SecurityPolicyEnforcerAction' => 'policy/SecurityPolicyEnforcerAction.php',
-    'WMFEscalateTaskController' => 'policy/WMFLockTaskController.php',
-    'WMFEscalateTaskEventListener' => 'policy/WMFLockTaskEventListener.php',
-    'WMFExtensionsApplication' => 'policy/WMFExtensionsApplication.php',
-    'WMFSecurityPolicy' => 'policy/WMFSecurityPolicy.php',
-    'WMFSubscribersPolicyRule' => 'policy/WMFSubscribersPolicyRule.php',
-  ),
+  'class' => array(),
   'function' => array(),
-  'xmap' => array(
-    'SecurityPolicyEnforcerAction' => 'HeraldAction',
-    'WMFEscalateTaskController' => 'PhabricatorController',
-    'WMFEscalateTaskEventListener' => 'PhabricatorEventListener',
-    'WMFExtensionsApplication' => 'PhabricatorApplication',
-    'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
-  ),
+  'xmap' => array(),
 ));
